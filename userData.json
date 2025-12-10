@@ -1,0 +1,72 @@
+{
+  "3123@gmail.com": {
+    "allowance": 20,
+    "goal": 40,
+    "purchases": [
+      {
+        "id": 1764761903924,
+        "date": "2025-12-03",
+        "name": "Eis",
+        "category": "Süßes",
+        "price": 1.5,
+        "feel": null,
+        "note": "",
+        "parentNote": ""
+      }
+    ],
+    "parentGlobalMessage": ""
+  },
+  "312@gmail.com": {
+    "allowance": 0,
+    "goal": 0,
+    "purchases": [],
+    "parentGlobalMessage": ""
+  },
+  "Kind@gmail.com": {
+    "allowance": 20,
+    "goal": 100,
+    "purchases": [
+      {
+        "id": 1765056462809,
+        "date": "2025-12-06",
+        "name": "Schokolade",
+        "category": "Snacks",
+        "price": 2.5,
+        "feel": 4,
+        "note": ""
+      },
+      {
+        "id": 1765056131670,
+        "date": "2025-12-06",
+        "name": "Eis",
+        "category": "Süßes",
+        "price": 1.5,
+        "feel": 5,
+        "note": ""
+      }
+    ],
+    "parentGlobalMessage": ""
+  },
+  "Eltern1@gmail.com": {
+    "allowance": 0,
+    "goal": 0,
+    "purchases": [],
+    "parentGlobalMessage": ""
+  },
+  "Kind1@gmail.com": {
+    "allowance": 50,
+    "goal": 0,
+    "purchases": [
+      {
+        "id": 1765358595293,
+        "date": "2025-12-10",
+        "name": "Eis",
+        "category": "Süßes",
+        "price": 1.5,
+        "feel": 4,
+        "note": ""
+      }
+    ],
+    "parentGlobalMessage": ""
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>SparFuchs Kids - Registrieren</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <h1>SparFuchs Kids</h1>
+
+  <div class="card">
+    <h2>Registrieren</h2>
+    <form id="registerForm">
+      <label for="email">E-Mail (muss nicht echt sein)</label>
+      <input type="email" id="email" required>
+
+      <label for="password">Passwort</label>
+      <input type="password" id="password" required>
+
+      <label for="password2">Passwort wiederholen</label>
+      <input type="password" id="password2" required>
+
+      <button type="submit">Konto anlegen</button>
+    </form>
+
+    <p>Schon ein Konto? <a href="index.html">Zum Login</a></p>
+    <p id="error" class="error"></p>
+    <p id="success" class="success"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const errorP = document.getElementById("error");
+    const successP = document.getElementById("success");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorP.textContent = "";
+      successP.textContent = "";
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const password2 = document.getElementById("password2").value;
+
+      if (password !== password2) {
+        errorP.textContent = "Passwörter stimmen nicht überein.";
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          errorP.textContent = data.message || "Registrierung fehlgeschlagen.";
+          return;
+        }
+
+        successP.textContent = "Registrierung erfolgreich! Du kannst dich jetzt einloggen.";
+      } catch (err) {
+        console.error(err);
+        errorP.textContent = "Fehler bei der Registrierung (Server nicht erreichbar?).";
+      }
+    });
+  </script>
+</body>
+</html>

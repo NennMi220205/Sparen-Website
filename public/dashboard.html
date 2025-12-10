@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>SparFuchs Kids - Dashboard</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <h1>SparFuchs Kids - Dashboard</h1>
+
+  <p id="welcome"></p>
+
+  <button id="logoutBtn">Logout</button>
+
+  <hr>
+
+  <!-- Hier können später Sparziele & Konten kommen -->
+  <p>Hier könnte dein Spar-Fortschritt stehen 😊</p>
+
+  <script>
+    const welcomeP = document.getElementById("welcome");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const email = localStorage.getItem("loggedInEmail");
+
+    // Wenn niemand "eingeloggt", zurück zum Login
+    if (!email) {
+      window.location.href = "index.html";
+    } else {
+      welcomeP.textContent = "Eingeloggt als: " + email;
+    }
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("loggedInEmail");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wertvoll? – Deine Woche</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="row" style="justify-content:space-between">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Wertvoll?</h1>
+          <div class="subtitle" id="headerSubtitle"></div>
+        </div>
+      </div>
+      <div class="row">
+        <button class="tab active" data-view="dashboard">Übersicht</button>
+        <button class="tab" data-view="new" id="tabNew">Neuer Kauf</button>
+        <button class="tab" data-view="family">Familie</button>
+        <button class="btn ghost" id="logoutBtn">Abmelden</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="view">
+    <div class="grid">
+      <div class="card half" id="cardChildDashboard">
+        <h2 class="headline">Deine Woche</h2>
+        <p class="muted" id="childDashText">
+          Behalte dein Taschengeld im Blick.
+        </p>
+
+        <div class="kpi" style="margin-top:10px">
+          <div class="pill">
+        <div class="muted">Taschengeld / Monat</div>
+        <h3 id="kpiAllowance">€ 0,00</h3>
+        </div>
+
+          <div class="pill">
+            <div class="muted">Ausgegeben</div>
+            <h3 id="kpiSpent">€ 0,00</h3>
+          </div>
+          <div class="pill">
+            <div class="muted">Übrig</div>
+            <h3 id="kpiLeft">€ 0,00</h3>
+          </div>
+          <div class="pill">
+            <div class="muted">Sparziel</div>
+            <h3 id="kpiGoal">€ 0,00</h3>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label for="allowance">Monatliches Taschengeld (€)</label>
+          <input type="number" id="allowance" min="0" step="0.5" />
+        </div>
+
+        <div style="margin-top:8px">
+          <label for="goal">Sparziel (€)</label>
+          <input type="number" id="goal" min="0" step="1" />
+        </div>
+
+        <div style="margin-top:10px" class="bar">
+          <span id="goalBar" style="width:0%"></span>
+        </div>
+        <p class="muted" id="goalHint" style="margin-top:4px">
+          0% des Sparziels erreicht.
+        </p>
+      </div>
+
+      <div class="card half" id="cardParentDashboard" hidden>
+        <h2 class="headline">Familien-Übersicht</h2>
+        <p class="muted">
+          Als Eltern siehst du hier, wie die Kinder ihr Taschengeld nutzen.
+        </p>
+        <div id="parentFamilySummary" style="margin-top:10px"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="headline">Letzte Käufe</h2>
+        <p class="muted">Deine letzten Ausgaben im Überblick.</p>
+        <div style="overflow:auto;margin-top:10px">
+          <table id="purchaseTable">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Was?</th>
+                <th>Kategorie</th>
+                <th>Preis</th>
+                <th>Gefühl</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEUER KAUF -->
+  <section id="new" class="view" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 class="headline">Neuer Kauf</h2>
+        <p class="muted">Halte fest, was du gekauft hast und wie es sich anfühlt.</p>
+
+        <div class="row" style="margin-top:10px">
+          <div style="flex:1;min-width:200px">
+            <label for="pName">Was?</label>
+            <input id="pName" placeholder="z. B. Eis" />
+          </div>
+          <div style="width:150px">
+            <label for="pPrice">Preis (€)</label>
+            <input id="pPrice" type="number" min="0" step="0.1" />
+          </div>
+          <div style="width:200px">
+            <label for="pCat">Kategorie</label>
+            <select id="pCat">
+              <option value="Süßes">🍬 Süßes</option>
+              <option value="Snacks">🧃 Snacks</option>
+              <option value="Spielzeug">🎮 Spielzeug</option>
+              <option value="Bücher">📚 Bücher</option>
+              <option value="Basteln">✂️ Basteln</option>
+              <option value="Sonstiges">🎁 Sonstiges</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Wie hast du dich beim Kauf gefühlt?</label>
+          <div class="emojis" id="initialEmojis">
+            <button class="emoji" data-val="5">😍</button>
+            <button class="emoji" data-val="4">🤩</button>
+            <button class="emoji" data-val="3">😊</button>
+            <button class="emoji" data-val="2">😐</button>
+            <button class="emoji" data-val="1">☹️</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px">
+          <button class="btn secondary" id="savePurchase">Kauf speichern</button>
+          <button class="btn ghost" data-view="dashboard">Abbrechen</button>
+        </div>
+
+        <p class="footer">
+          Hinweis: Daten werden serverseitig pro Account gespeichert. Eltern
+          sehen nur die Daten der Kinder in ihrer Familie.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAMILIE -->
+  <section id="family" class="view" hidden>
+    <div class="grid">
+      <div class="card" id="familyParentView" hidden>
+        <h2 class="headline">Elternbereich</h2>
+        <p class="muted">
+          Teile diesen Familien-Schlüssel mit deinen Kindern, damit sie ihr Konto verbinden.
+        </p>
+        <div id="familyKeyBox" class="family-key-box" style="margin-top:10px">
+          Dein Familien-Schlüssel: <span class="family-key" id="familyKeyText">–</span>
+        </div>
+
+        <h3 class="headline-sm" style="margin-top:16px">Kinder in deiner Familie</h3>
+        <div id="familyChildrenList"></div>
+      </div>
+
+      <div class="card" id="familyChildView" hidden>
+        <h2 class="headline">Mit Familie verbinden</h2>
+        <p class="muted">
+          Wenn deine Eltern schon ein Konto haben, tippe hier ihren
+          Familien-Schlüssel ein.
+        </p>
+        <div style="margin-top:10px">
+          <label for="joinFamilyKey">Familien-Schlüssel</label>
+          <input id="joinFamilyKey" placeholder="z. B. AB3F9Q" maxlength="10" />
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn secondary" id="joinFamilyBtn">Schlüssel einlösen</button>
+        </div>
+        <p id="joinFamilyMsg" class="muted" style="margin-top:6px"></p>
+
+        <h3 class="headline-sm" style="margin-top:18px">Aktuelle Familie</h3>
+        <div id="familyInfoChild"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

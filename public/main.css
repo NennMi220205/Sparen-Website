@@ -1,0 +1,320 @@
+:root{
+  --mint:#4CC9A0;
+  --yellow:#FFD659;
+  --blue:#0070F3;
+  --bg:#F3F4F7;
+  --text:#111827;
+  --muted:#6b7280;
+  --card:#ffffff;
+  --danger:#ef4444;
+  --ok:#16a34a;
+  --shadow:0 18px 45px rgba(15,23,42,.12);
+  --radius:20px;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+}
+
+body{
+  font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background:radial-gradient(circle at top, #e0f7ff 0, var(--bg) 60%);
+  color:var(--text);
+}
+
+/* Header / Brand */
+
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(10px);
+  background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.7));
+  border-bottom:1px solid #e5e7eb;
+}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:16px;
+}
+
+.brand{display:flex;align-items:center;gap:14px}
+.logo{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--mint),#2bb38b);
+  position:relative;
+  box-shadow:var(--shadow);
+}
+.logo::before{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border-radius:18px;
+  background:#fff;
+}
+.logo::after{
+  content:"?";
+  position:absolute;
+  right:-6px;top:-6px;
+  width:28px;height:28px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:var(--yellow);
+  color:#111;
+  font-weight:800;
+  border:2px solid #fff;
+  font-family:"Baloo 2","Poppins",system-ui;
+}
+
+h1{
+  margin:0;
+  font-size:28px;
+  font-family:"Baloo 2","Poppins",system-ui;
+}
+.subtitle{
+  margin-top:-2px;
+  color:var(--muted);
+}
+
+/* Tabs */
+
+.tab{
+  appearance:none;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  padding:9px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:.9rem;
+  font-weight:600;
+  transition:.18s;
+}
+.tab:hover{transform:translateY(-1px);box-shadow:0 6px 15px rgba(0,0,0,.05);}
+.tab.active{
+  background:var(--mint);
+  border-color:var(--mint);
+  color:#064e3b;
+}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* Buttons */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:none;
+  padding:11px 16px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:.95rem;
+  background:var(--blue);
+  color:#fff;
+  box-shadow:var(--shadow);
+  transition:.15s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 20px 40px rgba(15,23,42,.18);}
+.btn.secondary{background:var(--mint);color:#022c22;}
+.btn.ghost{
+  background:#fff;
+  color:var(--text);
+  border:1px solid #e5e7eb;
+  box-shadow:none;
+}
+.btn.small{
+  padding:6px 10px;
+  font-size:.8rem;
+  border-radius:999px;
+}
+.btn.danger{background:var(--danger);}
+
+/* Inputs */
+
+label{font-weight:600;font-size:.9rem;display:block;margin-bottom:4px;}
+input,select,textarea{
+  width:100%;
+  padding:11px 13px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  font:inherit;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--mint);
+  box-shadow:0 0 0 1px var(--mint);
+}
+textarea{resize:vertical;min-height:60px;}
+.muted{color:var(--muted);font-size:.88rem;}
+.error{color:var(--danger);font-size:.85rem;margin-top:6px;}
+.success{color:var(--ok);font-size:.85rem;margin-top:6px;}
+
+/* Layout Cards */
+
+main{padding:24px 0;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:16px;
+}
+.card{
+  grid-column:span 12;
+  background:var(--card);
+  padding:18px 18px 16px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+@media(min-width:900px){
+  .card.half{grid-column:span 6;}
+  .auth-grid{grid-template-columns:1.15fr .85fr;}
+}
+
+/* Auth Layout */
+
+.auth-layout{
+  min-height:calc(100vh - 90px);
+  display:flex;
+  align-items:center;
+}
+.auth-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+  width:100%;
+}
+.hero-text h2{
+  margin:0 0 8px;
+  font-family:"Baloo 2","Poppins";
+  font-size:26px;
+}
+.hero-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#e0fbf3;
+  color:#065f46;
+  font-size:.8rem;
+  font-weight:600;
+}
+
+/* Role picker */
+
+.role-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.role-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+  font-size:.9rem;
+}
+.role-pill input{margin:0;}
+.role-pill.active{
+  background:#ecfdf5;
+  border-color:var(--mint);
+}
+
+/* KPI & Table */
+
+.headline{font-family:"Baloo 2","Poppins";margin:0 0 6px;}
+.headline-sm{font-family:"Baloo 2","Poppins";margin:0 0 4px;}
+.footer{margin-top:18px;color:var(--muted);font-size:.8rem;}
+
+.kpi{display:flex;gap:12px;flex-wrap:wrap;}
+.kpi .pill{
+  padding:10px 12px;
+  border-radius:12px;
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+  min-width:120px;
+}
+.kpi .pill h3{
+  margin:0;
+  font-family:"Baloo 2","Poppins";
+  font-size:20px;
+}
+
+.bar{
+  height:14px;
+  background:#e5f7f1;
+  border-radius:999px;
+  overflow:hidden;
+}
+.bar > span{
+  display:block;
+  height:100%;
+  background:var(--mint);
+}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 8px;
+}
+th{
+  text-align:left;
+  font-size:.8rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--muted);
+}
+td{
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+  padding:10px;
+}
+td:first-child{border-radius:10px 0 0 10px;}
+td:last-child{border-radius:0 10px 10px 0;}
+
+/* Emoji */
+
+.emojis{display:flex;gap:10px;font-size:26px;margin-top:6px;}
+.emoji{
+  border:none;
+  background:none;
+  cursor:pointer;
+  filter:grayscale(.6);
+  opacity:.6;
+  transition:.14s;
+}
+.emoji.active{
+  filter:none;
+  opacity:1;
+  transform:scale(1.1);
+}
+
+/* Parent / Family */
+
+.family-key-box{
+  padding:10px 12px;
+  border-radius:14px;
+  background:#ecfdf5;
+  border:1px dashed #4ade80;
+  font-size:.9rem;
+}
+.family-key{
+  font-weight:800;
+  letter-spacing:.18em;
+}
+
+.parent-child-card{
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  padding:10px 12px;
+  margin-bottom:10px;
+  background:#f9fafb;
+}
