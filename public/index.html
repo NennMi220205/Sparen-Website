@@ -4,55 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Wertvoll? – Login</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="main.css" />
 </head>
 <body>
-<header>
-  <div class="container">
-    <div class="row" style="justify-content:space-between">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>Wertvoll?</h1>
-          <div class="subtitle">Deine Taschengeld-Entscheidung</div>
-        </div>
+  <main class="container auth-layout">
+    <div class="auth-grid">
+      <div class="card">
+        <h2>Wertvoll?</h2>
+        <p class="muted">Demo-Accounts:</p>
+        <ul class="muted">
+          <li>Eltern: <b>parent@test.de</b> / parent123</li>
+          <li>Kind: <b>kid1@test.de</b> / kid123</li>
+          <li>Kind: <b>kid2@test.de</b> / kid123</li>
+        </ul>
       </div>
-    </div>
-  </div>
-</header>
 
-<main class="container auth-layout">
-  <div class="auth-grid">
-    <!-- Linke Seite: Text / Illustration -->
-    <div class="card">
-      <div class="hero-text">
-        <span class="hero-badge">Neu · Eltern & Kinder gemeinsam sparen</span>
-        <h2>Triff kluge Entscheidungen mit deinem Taschengeld.</h2>
-        <p class="muted">
-          Kinder lernen, wie sich Käufe anfühlen. Eltern sehen transparent,
-          wofür das Taschengeld genutzt wird – ganz ohne Kontrolle.
-        </p>
-      </div>
-      <ul class="muted">
-        <li>Wöchentliches Taschengeld & Sparziel festlegen</li>
-        <li>Käufe mit Emoji-Stimmung festhalten</li>
-        <li>Eltern erhalten einen Familien-Schlüssel 🔐</li>
-        <li>Kinder können diesen einlösen und Familie teilen</li>
-      </ul>
-    </div>
-
-    <!-- Rechte Seite: Login + Registrierung -->
-    <div class="card">
-      <div style="display:flex;gap:16px;flex-direction:column">
+      <div class="card">
         <!-- LOGIN -->
-        <section>
+        <section id="loginSection">
           <h3 class="headline-sm">Einloggen</h3>
           <p class="muted">Melde dich mit deinem bestehenden Konto an.</p>
+
           <form id="loginForm" style="margin-top:8px">
             <div style="margin-bottom:8px">
               <label for="loginEmail">E-Mail</label>
@@ -62,20 +34,26 @@
               <label for="loginPassword">Passwort</label>
               <input type="password" id="loginPassword" required />
             </div>
+
             <button type="submit" class="btn" style="width:100%">Einloggen</button>
+            <button type="button" class="btn ghost" id="goRegisterBtn" style="width:100%;margin-top:10px">
+              Registrieren
+            </button>
+
             <p id="loginError" class="error"></p>
           </form>
         </section>
 
-        <hr style="border:none;border-top:1px solid #e5e7eb" />
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0" />
 
         <!-- REGISTRIERUNG -->
-        <section>
+        <section id="registerSection">
           <h3 class="headline-sm">Neues Konto anlegen</h3>
           <p class="muted">Wähle, ob du Elternteil oder Kind bist.</p>
+
           <form id="registerForm" style="margin-top:8px">
             <div style="margin-bottom:8px">
-              <label for="regEmail">E-Mail (muss nicht echt sein)</label>
+              <label for="regEmail">E-Mail</label>
               <input type="email" id="regEmail" required />
             </div>
             <div style="margin-bottom:8px">
@@ -102,18 +80,10 @@
             </div>
 
             <div id="familyKeyGroup" style="margin-bottom:8px">
-              <label for="familyKey">
-                Familien-Schlüssel der Eltern (optional)
-              </label>
-              <input
-                type="text"
-                id="familyKey"
-                placeholder="z. B. AB3F9Q"
-                maxlength="10"
-              />
+              <label for="familyKey">Familien-Schlüssel der Eltern (optional)</label>
+              <input type="text" id="familyKey" placeholder="z. B. AB3F9Q" maxlength="10" />
               <p class="muted" style="margin-top:4px">
-                Wenn deine Eltern schon einen Account haben, tippe hier ihren
-                Schlüssel ein, um in dieselbe Familie zu kommen.
+                Wenn deine Eltern schon einen Account haben, tippe hier ihren Schlüssel ein.
               </p>
             </div>
 
@@ -127,26 +97,24 @@
         </section>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
 <script>
-  // Rollen-Auswahl optisch
+  // Scroll zu Registrierung
+  document.getElementById("goRegisterBtn").addEventListener("click", () => {
+    document.getElementById("registerSection").scrollIntoView({ behavior: "smooth" });
+  });
+
+  // Rollen optisch + Familienkey anzeigen
   const roleRow = document.getElementById("roleRow");
   const familyKeyGroup = document.getElementById("familyKeyGroup");
 
   roleRow.addEventListener("change", () => {
-    [...roleRow.querySelectorAll(".role-pill")].forEach((p) =>
-      p.classList.remove("active")
-    );
+    [...roleRow.querySelectorAll(".role-pill")].forEach((p) => p.classList.remove("active"));
     const checked = roleRow.querySelector("input[name='role']:checked");
     if (checked) {
       checked.closest(".role-pill").classList.add("active");
-      if (checked.value === "parent") {
-        familyKeyGroup.style.display = "none";
-      } else {
-        familyKeyGroup.style.display = "block";
-      }
+      familyKeyGroup.style.display = checked.value === "parent" ? "none" : "block";
     }
   });
 
@@ -167,8 +135,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (!data.success) {
         loginError.textContent = data.message || "Login fehlgeschlagen.";
         return;
@@ -176,9 +144,7 @@
 
       localStorage.setItem("loggedInEmail", data.email);
       localStorage.setItem("loggedInRole", data.role);
-      if (data.familyKey) {
-        localStorage.setItem("familyKey", data.familyKey);
-      }
+      if (data.familyKey) localStorage.setItem("familyKey", data.familyKey);
 
       window.location.href = "app.html";
     } catch (err) {
@@ -187,7 +153,7 @@
     }
   });
 
-  // REGISTRIEREN
+  // REGISTER
   const registerForm = document.getElementById("registerForm");
   const registerError = document.getElementById("registerError");
   const registerSuccess = document.getElementById("registerSuccess");
@@ -201,10 +167,9 @@
     const password = document.getElementById("regPassword").value;
     const password2 = document.getElementById("regPassword2").value;
     const role = registerForm.role.value;
-    const familyKey =
-      role === "child"
-        ? document.getElementById("familyKey").value.trim().toUpperCase()
-        : "";
+    const familyKey = role === "child"
+      ? document.getElementById("familyKey").value.trim().toUpperCase()
+      : "";
 
     if (password !== password2) {
       registerError.textContent = "Passwörter stimmen nicht überein.";
@@ -217,8 +182,8 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role, familyKey })
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (!data.success) {
         registerError.textContent = data.message || "Registrierung fehlgeschlagen.";
         return;
@@ -230,11 +195,6 @@
       }
 
       registerForm.reset();
-      // Rolle wieder auf Kind stellen
-      roleRow.querySelectorAll(".role-pill").forEach((p) => p.classList.remove("active"));
-      roleRow.querySelector(".role-pill input[value='child']").checked = true;
-      roleRow.querySelector(".role-pill").classList.add("active");
-      familyKeyGroup.style.display = "block";
     } catch (err) {
       console.error(err);
       registerError.textContent = "Server nicht erreichbar?";
