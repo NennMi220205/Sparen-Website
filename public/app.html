@@ -3,32 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wertvoll? – App</title>
+  <title>Wertvoll? – Deine Woche</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="main.css" />
-  <main class="container">
-  <section id="dashboard" class="view"> 
 </head>
 <body>
-  <header class="container">
+<header>
+  <div class="container">
     <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0">Wertvoll?</h2>
-      <button class="btn ghost" id="logoutBtn">Abmelden</button>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Wertvoll?</h1>
+          <div class="subtitle" id="headerSubtitle"></div>
+        </div>
+      </div>
+      <div class="row">
+        <button class="tab active" data-view="dashboard">Übersicht</button>
+        <button class="tab" data-view="new" id="tabNew">Neuer Kauf</button>
+        <button class="tab" data-view="family">Familie</button>
+        <button class="btn ghost" id="logoutBtn">Abmelden</button>
+      </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="container">
-    <div class="card">
-      <h3 class="headline-sm">Du bist eingeloggt</h3>
-      <p class="muted" id="who"></p>
-    </div>
+<main class="container">
 
-    <div class="card" style="margin-top:16px">
-      <h3 class="headline-sm">State-Test</h3>
-      <button class="btn secondary" id="loadBtn">State laden</button>
-      <pre id="out" style="white-space:pre-wrap"></pre>
-    </div>
-  </main>
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="view">
+    <!-- (gekürzt – dein kompletter Inhalt kommt hier rein) -->
+  </section>
 
-  <script src="app.js"></script>
+  <!-- NEUER KAUF -->
+  <section id="new" class="view" hidden></section>
+
+  <!-- FAMILIE -->
+  <section id="family" class="view" hidden></section>
+
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>
