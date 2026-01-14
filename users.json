@@ -1,34 +1,5 @@
 [
-  {
-    "email": "michixnen@gmail.com",
-    "password": "123"
-  },
-  {
-    "email": "3123@gmail.com",
-    "password": "123"
-  },
-  {
-    "email": "312@gmail.com",
-    "password": "Leo",
-    "role": "parent",
-    "familyKey": "N2WH8C"
-  },
-  {
-    "email": "Kind@gmail.com",
-    "password": "Leo",
-    "role": "child",
-    "familyKey": "N2WH8C"
-  },
-  {
-    "email": "Eltern1@gmail.com",
-    "password": "123",
-    "role": "parent",
-    "familyKey": "EBGPKU"
-  },
-  {
-    "email": "Kind1@gmail.com",
-    "password": "123",
-    "role": "child",
-    "familyKey": "EBGPKU"
-  }
+  { "email": "parent@test.de", "password": "parent123", "role": "parent", "familyKey": "AB3F9Q" },
+  { "email": "kid1@test.de", "password": "kid123", "role": "child", "familyKey": "AB3F9Q" },
+  { "email": "kid2@test.de", "password": "kid123", "role": "child", "familyKey": "AB3F9Q" }
 ]
