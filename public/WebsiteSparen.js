@@ -1,37 +1,35 @@
+// WebsiteSparen.js — passt zu WebsiteSparen.html
+
 const email = localStorage.getItem("loggedInEmail");
 const role = localStorage.getItem("loggedInRole") || "child";
-
 const KEY = (name) => `wertvoll:${email}:${name}`;
 
 let state = {
   allowance: 0,
   goal: 0,
-  purchases: [],
-  parentMessages: []
+  purchases: [],       // {id,date,name,category,price,feel,note,parentComment}
+  parentMessages: []   // strings
 };
 
 let currentFeel = null;
 
+// ---------- helpers ----------
 function formatEuro(val) {
   const n = Number(val) || 0;
   return "€ " + n.toFixed(2).replace(".", ",");
 }
-
 function feelToEmoji(feel) {
   return { 5: "😍", 4: "🤩", 3: "😊", 2: "😐", 1: "☹️" }[feel] || "";
 }
-
 function loadState() {
   const raw = localStorage.getItem(KEY("state"));
   if (raw) {
     try { state = JSON.parse(raw); } catch {}
   }
 }
-
 function saveState() {
   localStorage.setItem(KEY("state"), JSON.stringify(state));
 }
-
 function getPurchasesLast7Days(purchases) {
   const now = new Date();
   const seven = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -41,7 +39,7 @@ function getPurchasesLast7Days(purchases) {
   });
 }
 
-// Tabs
+// ---------- tabs ----------
 function setupTabs() {
   const tabs = document.querySelectorAll(".tab");
   const views = document.querySelectorAll(".view");
@@ -53,14 +51,15 @@ function setupTabs() {
 
   tabs.forEach(t => t.addEventListener("click", () => showView(t.dataset.view)));
 
-  document.querySelectorAll("button[data-view]").forEach(btn => {
+  // Buttons wie "Jetzt reflektieren" / "Abbrechen"
+  document.querySelectorAll("button[data-view]:not(.tab)").forEach(btn => {
     btn.addEventListener("click", () => showView(btn.dataset.view));
   });
 
   showView("dashboard");
 }
 
-// KPI
+// ---------- dashboard ----------
 function renderKpis() {
   const allowanceInput = document.getElementById("allowance");
   const goalInput = document.getElementById("goal");
@@ -86,9 +85,7 @@ function renderKpis() {
   if (kpiGoal) kpiGoal.textContent = formatEuro(state.goal);
 
   let percent = 0;
-  if ((Number(state.goal) || 0) > 0) {
-    percent = Math.min(100, Math.round((left / state.goal) * 100));
-  }
+  if ((Number(state.goal) || 0) > 0) percent = Math.min(100, Math.round((left / state.goal) * 100));
   if (goalBar) goalBar.style.width = percent + "%";
   if (goalHint) goalHint.textContent = `${percent}% des Sparziels erreicht`;
 }
@@ -116,7 +113,7 @@ function setupMoneyInputs() {
   }
 }
 
-// Purchases
+// ---------- purchases ----------
 function renderPurchases() {
   const tbody = document.querySelector("#purchaseTable tbody");
   if (!tbody) return;
@@ -142,6 +139,7 @@ function renderPurchases() {
 
     const tdDel = document.createElement("td");
     const del = document.createElement("button");
+    del.type = "button";
     del.className = "btn small ghost";
     del.textContent = "Löschen";
     del.addEventListener("click", () => {
@@ -211,6 +209,7 @@ function setupNewPurchase() {
       renderPurchases();
       renderKpis();
       renderReflect();
+      renderReflectGoal();
       renderStats();
       renderParent();
 
@@ -219,7 +218,7 @@ function setupNewPurchase() {
   }
 }
 
-// Reflection
+// ---------- reflection ----------
 function renderReflect() {
   const container = document.getElementById("reflectList");
   if (!container) return;
@@ -282,7 +281,7 @@ function renderReflectGoal() {
   if (hint) hint.textContent = `${percent}% erreicht`;
 }
 
-// Stats
+// ---------- stats ----------
 function renderStats() {
   const catStats = document.getElementById("catStats");
   const valuePrice = document.getElementById("valuePrice");
@@ -303,15 +302,13 @@ function renderStats() {
   });
 
   if (catStats) {
-    Object.entries(sums)
-      .sort((a,b) => b[1]-a[1])
-      .forEach(([k,v]) => {
-        const row = document.createElement("div");
-        row.className = "muted";
-        row.style.marginBottom = "6px";
-        row.textContent = `${k}: ${formatEuro(v)}`;
-        catStats.appendChild(row);
-      });
+    Object.entries(sums).sort((a,b) => b[1]-a[1]).forEach(([k,v]) => {
+      const row = document.createElement("div");
+      row.className = "muted";
+      row.style.marginBottom = "6px";
+      row.textContent = `${k}: ${formatEuro(v)}`;
+      catStats.appendChild(row);
+    });
   }
 
   if (valuePrice) {
@@ -325,7 +322,7 @@ function renderStats() {
   }
 }
 
-// Parent
+// ---------- parent ----------
 function renderParent() {
   const parentList = document.getElementById("parentList");
   const parentMessages = document.getElementById("parentMessages");
@@ -387,13 +384,15 @@ function setupParentMessage() {
   });
 }
 
+// ---------- logout ----------
 function setupLogout() {
   const logoutBtn = document.getElementById("logoutBtn");
   if (!logoutBtn) return;
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("loggedInEmail");
     localStorage.removeItem("loggedInRole");
-    window.location.href = "index.html";
+    localStorage.removeItem("familyKey");
+    window.location.href = "/index.html";
   });
 }
 
@@ -402,10 +401,10 @@ function applyRole() {
   if (parentTab) parentTab.style.display = role === "parent" ? "inline-flex" : "none";
 }
 
-// Init
+// ---------- init ----------
 document.addEventListener("DOMContentLoaded", () => {
   if (!email) {
-    window.location.href = "index.html";
+    window.location.href = "/index.html";
     return;
   }
 
