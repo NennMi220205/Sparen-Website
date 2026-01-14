@@ -1,192 +1,112 @@
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
-// Static Frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-// Files
-const USERS_FILE = path.join(__dirname, "users.json");
-const STATE_FILE = path.join(__dirname, "userData.json");
+// --------------------
+// Demo-Accounts (fix)
+// --------------------
+const DEMO_USERS = [
+  { email: "parent@test.de", password: "parent123", role: "parent", familyKey: "AB3F9Q" },
+  { email: "kid1@test.de", password: "kid123", role: "child", familyKey: "AB3F9Q" },
+  { email: "kid2@test.de", password: "kid123", role: "child", familyKey: "AB3F9Q" }
+];
 
-// ---------- Helpers ----------
-function readJson(file, fallback) {
-  try {
-    if (!fs.existsSync(file)) return fallback;
-    const raw = fs.readFileSync(file, "utf8");
-    if (!raw.trim()) return fallback;
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error("readJson error:", e);
-    return fallback;
-  }
-}
-
-function writeJson(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
-}
-
-function normalizeEmail(email) {
+function norm(email) {
   return String(email || "").trim().toLowerCase();
 }
 
-function makeFamilyKey() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return out;
-}
+// --------------------
+// Demo-State (RAM)
+// --------------------
+const demoState = {
+  "parent@test.de": { allowance: 0, goal: 0, purchases: [], parentGlobalMessage: "" },
+  "kid1@test.de": { allowance: 20, goal: 50, purchases: [], parentGlobalMessage: "" },
+  "kid2@test.de": { allowance: 15, goal: 30, purchases: [], parentGlobalMessage: "" }
+};
 
-// Ensure files exist
-function ensureFiles() {
-  if (!fs.existsSync(USERS_FILE)) writeJson(USERS_FILE, []);
-  if (!fs.existsSync(STATE_FILE)) writeJson(STATE_FILE, {});
-}
-ensureFiles();
-
-// ---------- API ----------
-app.post("/api/register", (req, res) => {
-  const { email, password, role = "child", familyKey = "" } = req.body || {};
-
-  const e = normalizeEmail(email);
-  const p = String(password || "");
-
-  if (!e || !p) return res.json({ success: false, message: "Email und Passwort nötig." });
-  if (!["child", "parent"].includes(role)) return res.json({ success: false, message: "Ungültige Rolle." });
-
-  const users = readJson(USERS_FILE, []);
-  if (users.some(u => normalizeEmail(u.email) === e)) {
-    return res.json({ success: false, message: "User existiert schon." });
-  }
-
-  // Eltern bekommen einen Familien-Key
-  let finalFamilyKey = "";
-  if (role === "parent") {
-    finalFamilyKey = makeFamilyKey();
-  } else {
-    finalFamilyKey = String(familyKey || "").trim().toUpperCase();
-  }
-
-  // Für echten Einsatz: Passwort hashen (bcrypt). Für Test: Klartext.
-  users.push({ email: e, password: p, role, familyKey: finalFamilyKey });
-  writeJson(USERS_FILE, users);
-
-  // initialer State
-  const allStates = readJson(STATE_FILE, {});
-  if (!allStates[e]) {
-    allStates[e] = { allowance: 0, goal: 0, purchases: [], parentGlobalMessage: "" };
-    writeJson(STATE_FILE, allStates);
-  }
-
-  return res.json({
-    success: true,
-    email: e,
-    role,
-    familyKey: role === "parent" ? finalFamilyKey : finalFamilyKey || ""
-  });
+// Registrierung deaktiviert (Demo)
+app.post("/api/register", (_req, res) => {
+  res.json({ success: false, message: "Demo: Registrierung deaktiviert. Bitte Demo-Accounts nutzen." });
 });
 
+// Login nur Demo-Accounts
 app.post("/api/login", (req, res) => {
-  const { email, password } = req.body || {};
-  const e = normalizeEmail(email);
-  const p = String(password || "");
+  const email = norm(req.body?.email);
+  const password = String(req.body?.password || "");
 
-  const users = readJson(USERS_FILE, []);
-  const user = users.find(u => normalizeEmail(u.email) === e);
+  const user = DEMO_USERS.find(
+    u => norm(u.email) === email && u.password === password
+  );
 
-  if (!user) return res.json({ success: false, message: "User nicht gefunden." });
-  if (String(user.password) !== p) return res.json({ success: false, message: "Passwort falsch." });
+  if (!user) {
+    return res.json({ success: false, message: "Falsche Demo-Login-Daten." });
+  }
 
   return res.json({
     success: true,
     email: user.email,
     role: user.role,
-    familyKey: user.familyKey || ""
+    familyKey: user.familyKey
   });
 });
 
 // State laden
 app.get("/api/state", (req, res) => {
-  const e = normalizeEmail(req.query.email);
-  if (!e) return res.json({ success: false, message: "email fehlt" });
+  const email = norm(req.query.email);
+  if (!email) return res.json({ success: false, message: "email fehlt" });
 
-  const allStates = readJson(STATE_FILE, {});
-  const state = allStates[e] || { allowance: 0, goal: 0, purchases: [], parentGlobalMessage: "" };
+  const state = demoState[email] || { allowance: 0, goal: 0, purchases: [], parentGlobalMessage: "" };
   return res.json({ success: true, state });
 });
 
 // State speichern
 app.post("/api/state", (req, res) => {
-  const { email, state } = req.body || {};
-  const e = normalizeEmail(email);
-  if (!e || !state) return res.json({ success: false, message: "email/state fehlt" });
+  const email = norm(req.body?.email);
+  const state = req.body?.state;
 
-  const allStates = readJson(STATE_FILE, {});
-  allStates[e] = state;
-  writeJson(STATE_FILE, allStates);
+  if (!email || !state) return res.json({ success: false, message: "email/state fehlt" });
 
+  const isDemoUser = DEMO_USERS.some(u => norm(u.email) === email);
+  if (!isDemoUser) return res.json({ success: false, message: "Unbekannter Demo-Account." });
+
+  demoState[email] = state;
   return res.json({ success: true });
 });
 
-// Familieninfo: Key + Mitglieder + deren States
+// Familienübersicht (Key + Members + deren State)
 app.get("/api/familyStates", (req, res) => {
-  const e = normalizeEmail(req.query.email);
-  if (!e) return res.json({ success: false, message: "email fehlt" });
+  const email = norm(req.query.email);
+  if (!email) return res.json({ success: false, message: "email fehlt" });
 
-  const users = readJson(USERS_FILE, []);
-  const allStates = readJson(STATE_FILE, {});
-  const me = users.find(u => normalizeEmail(u.email) === e);
-  if (!me) return res.json({ success: false, message: "User nicht gefunden" });
+  const me = DEMO_USERS.find(u => norm(u.email) === email);
+  if (!me) return res.json({ success: true, familyKey: "", members: [] });
 
   const familyKey = (me.familyKey || "").toUpperCase();
 
-  if (!familyKey) {
-    return res.json({ success: true, familyKey: "", members: [] });
-  }
-
-  const members = users
+  const members = DEMO_USERS
     .filter(u => (u.familyKey || "").toUpperCase() === familyKey)
     .map(u => ({
       email: u.email,
       role: u.role,
-      state: allStates[normalizeEmail(u.email)] || { allowance: 0, goal: 0, purchases: [] }
+      state: demoState[norm(u.email)] || { allowance: 0, goal: 0, purchases: [] }
     }));
 
   return res.json({ success: true, familyKey, members });
 });
 
-// Kind verbindet sich mit FamilyKey
-app.post("/api/joinFamily", (req, res) => {
-  const { email, familyKey } = req.body || {};
-  const e = normalizeEmail(email);
-  const key = String(familyKey || "").trim().toUpperCase();
-
-  if (!e || !key) return res.json({ success: false, message: "email/familyKey fehlt" });
-
-  const users = readJson(USERS_FILE, []);
-  const idx = users.findIndex(u => normalizeEmail(u.email) === e);
-  if (idx === -1) return res.json({ success: false, message: "User nicht gefunden" });
-
-  // Key muss existieren (mind. ein Eltern-Account mit diesem Key)
-  const hasParent = users.some(u => u.role === "parent" && (u.familyKey || "").toUpperCase() === key);
-  if (!hasParent) return res.json({ success: false, message: "Familien-Schlüssel ungültig." });
-
-  users[idx].familyKey = key;
-  writeJson(USERS_FILE, users);
-
-  return res.json({ success: true });
+// joinFamily: in Demo fix – aber Route existiert, damit Frontend nicht bricht
+app.post("/api/joinFamily", (_req, res) => {
+  res.json({ success: false, message: "Demo: Familienzuordnung ist fest (AB3F9Q)." });
 });
 
-// Fallback: Startseite
-app.get("*", (_, res) => {
+// Fallback
+app.get("*", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server läuft auf Port ${PORT}`);
-});
+app.listen(PORT, () => console.log("Server läuft auf Port", PORT));
