@@ -7,118 +7,52 @@
   <link rel="stylesheet" href="main.css" />
 </head>
 <body>
-  <main class="container auth-layout">
-    <div class="auth-grid">
-      <div class="card">
-        <h2>Wertvoll?</h2>
-        <p class="muted">Demo-Accounts:</p>
-        <ul class="muted">
-          <li>Eltern: <b>parent@test.de</b> / parent123</li>
-          <li>Kind: <b>kid1@test.de</b> / kid123</li>
-          <li>Kind: <b>kid2@test.de</b> / kid123</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <!-- LOGIN -->
-        <section id="loginSection">
-          <h3 class="headline-sm">Einloggen</h3>
-          <p class="muted">Melde dich mit deinem bestehenden Konto an.</p>
-
-          <form id="loginForm" style="margin-top:8px">
-            <div style="margin-bottom:8px">
-              <label for="loginEmail">E-Mail</label>
-              <input type="email" id="loginEmail" required />
-            </div>
-            <div style="margin-bottom:10px">
-              <label for="loginPassword">Passwort</label>
-              <input type="password" id="loginPassword" required />
-            </div>
-
-            <button type="submit" class="btn" style="width:100%">Einloggen</button>
-            <button type="button" class="btn ghost" id="goRegisterBtn" style="width:100%;margin-top:10px">
-              Registrieren
-            </button>
-
-            <p id="loginError" class="error"></p>
-          </form>
-        </section>
-
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0" />
-
-        <!-- REGISTRIERUNG -->
-        <section id="registerSection">
-          <h3 class="headline-sm">Neues Konto anlegen</h3>
-          <p class="muted">Wähle, ob du Elternteil oder Kind bist.</p>
-
-          <form id="registerForm" style="margin-top:8px">
-            <div style="margin-bottom:8px">
-              <label for="regEmail">E-Mail</label>
-              <input type="email" id="regEmail" required />
-            </div>
-            <div style="margin-bottom:8px">
-              <label for="regPassword">Passwort</label>
-              <input type="password" id="regPassword" required />
-            </div>
-            <div style="margin-bottom:8px">
-              <label for="regPassword2">Passwort wiederholen</label>
-              <input type="password" id="regPassword2" required />
-            </div>
-
-            <div style="margin-bottom:8px">
-              <label>Rolle</label>
-              <div class="role-row" id="roleRow">
-                <label class="role-pill active">
-                  <input type="radio" name="role" value="child" checked />
-                  Kind
-                </label>
-                <label class="role-pill">
-                  <input type="radio" name="role" value="parent" />
-                  Elternteil
-                </label>
-              </div>
-            </div>
-
-            <div id="familyKeyGroup" style="margin-bottom:8px">
-              <label for="familyKey">Familien-Schlüssel der Eltern (optional)</label>
-              <input type="text" id="familyKey" placeholder="z. B. AB3F9Q" maxlength="10" />
-              <p class="muted" style="margin-top:4px">
-                Wenn deine Eltern schon einen Account haben, tippe hier ihren Schlüssel ein.
-              </p>
-            </div>
-
-            <button type="submit" class="btn secondary" style="width:100%">
-              Konto anlegen
-            </button>
-
-            <p id="registerError" class="error"></p>
-            <p id="registerSuccess" class="success"></p>
-          </form>
-        </section>
+<header>
+  <div class="container">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Wertvoll?</h1>
+        <div class="subtitle">Demo-Login (Prüfer-Modus)</div>
       </div>
     </div>
-  </main>
+  </div>
+</header>
+
+<main class="container auth-layout">
+  <div class="auth-grid">
+    <div class="card">
+      <h2 class="headline">Demo-Accounts</h2>
+      <p class="muted">Nutze einen dieser Accounts:</p>
+      <ul class="muted">
+        <li><b>Eltern:</b> parent@test.de / parent123</li>
+        <li><b>Kind 1:</b> kid1@test.de / kid123</li>
+        <li><b>Kind 2:</b> kid2@test.de / kid123</li>
+      </ul>
+      <p class="muted">Familien-Schlüssel (fix): <b>AB3F9Q</b></p>
+    </div>
+
+    <div class="card">
+      <h3 class="headline-sm">Einloggen</h3>
+      <p class="muted">Melde dich mit einem Demo-Account an.</p>
+
+      <form id="loginForm" style="margin-top:8px">
+        <div style="margin-bottom:8px">
+          <label for="loginEmail">E-Mail</label>
+          <input type="email" id="loginEmail" required />
+        </div>
+        <div style="margin-bottom:10px">
+          <label for="loginPassword">Passwort</label>
+          <input type="password" id="loginPassword" required />
+        </div>
+        <button type="submit" class="btn" style="width:100%">Einloggen</button>
+        <p id="loginError" class="error"></p>
+      </form>
+    </div>
+  </div>
+</main>
 
 <script>
-  // Scroll zu Registrierung
-  document.getElementById("goRegisterBtn").addEventListener("click", () => {
-    document.getElementById("registerSection").scrollIntoView({ behavior: "smooth" });
-  });
-
-  // Rollen optisch + Familienkey anzeigen
-  const roleRow = document.getElementById("roleRow");
-  const familyKeyGroup = document.getElementById("familyKeyGroup");
-
-  roleRow.addEventListener("change", () => {
-    [...roleRow.querySelectorAll(".role-pill")].forEach((p) => p.classList.remove("active"));
-    const checked = roleRow.querySelector("input[name='role']:checked");
-    if (checked) {
-      checked.closest(".role-pill").classList.add("active");
-      familyKeyGroup.style.display = checked.value === "parent" ? "none" : "block";
-    }
-  });
-
-  // LOGIN
   const loginForm = document.getElementById("loginForm");
   const loginError = document.getElementById("loginError");
 
@@ -150,54 +84,6 @@
     } catch (err) {
       console.error(err);
       loginError.textContent = "Server nicht erreichbar?";
-    }
-  });
-
-  // REGISTER
-  const registerForm = document.getElementById("registerForm");
-  const registerError = document.getElementById("registerError");
-  const registerSuccess = document.getElementById("registerSuccess");
-
-  registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    registerError.textContent = "";
-    registerSuccess.textContent = "";
-
-    const email = document.getElementById("regEmail").value.trim();
-    const password = document.getElementById("regPassword").value;
-    const password2 = document.getElementById("regPassword2").value;
-    const role = registerForm.role.value;
-    const familyKey = role === "child"
-      ? document.getElementById("familyKey").value.trim().toUpperCase()
-      : "";
-
-    if (password !== password2) {
-      registerError.textContent = "Passwörter stimmen nicht überein.";
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role, familyKey })
-      });
-
-      const data = await res.json();
-      if (!data.success) {
-        registerError.textContent = data.message || "Registrierung fehlgeschlagen.";
-        return;
-      }
-
-      registerSuccess.textContent = "Registrierung erfolgreich! Du kannst dich jetzt einloggen.";
-      if (data.role === "parent" && data.familyKey) {
-        registerSuccess.textContent += ` Dein Familien-Schlüssel: ${data.familyKey}`;
-      }
-
-      registerForm.reset();
-    } catch (err) {
-      console.error(err);
-      registerError.textContent = "Server nicht erreichbar?";
     }
   });
 </script>
