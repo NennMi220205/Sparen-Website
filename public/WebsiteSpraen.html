@@ -1,439 +1,229 @@
-// WebsiteSparen.js — passt zu WebsiteSparen.html (Start/New/Reflect/Stats/Parent)
-
-const email = localStorage.getItem("loggedInEmail");
-const role = localStorage.getItem("loggedInRole") || "child";
-
-// Pro User getrennte Speicherung
-const KEY = (name) => `wertvoll:${email}:${name}`;
-
-// State
-let state = {
-  allowance: 0,
-  goal: 0,
-  purchases: [], // {id,date,name,category,price,feel,note,parentComment}
-  parentMessages: [] // strings
-};
-
-let currentFeel = null;
-
-// ---------- Helpers ----------
-function formatEuro(val) {
-  const n = Number(val) || 0;
-  return "€ " + n.toFixed(2).replace(".", ",");
-}
-
-function feelToEmoji(feel) {
-  return { 5: "😍", 4: "🤩", 3: "😊", 2: "😐", 1: "☹️" }[feel] || "";
-}
-
-function loadState() {
-  const raw = localStorage.getItem(KEY("state"));
-  if (raw) {
-    try { state = JSON.parse(raw); } catch {}
-  }
-}
-
-function saveState() {
-  localStorage.setItem(KEY("state"), JSON.stringify(state));
-}
-
-function getPurchasesLast7Days(purchases) {
-  const now = new Date();
-  const seven = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  return (purchases || []).filter(p => {
-    const d = new Date(p.date);
-    return !Number.isNaN(d.getTime()) && d >= seven && d <= now;
-  });
-}
-
-// ---------- Tabs ----------
-function setupTabs() {
-  const tabs = document.querySelectorAll(".tab");
-  const views = document.querySelectorAll(".view");
-
-  function showView(id) {
-    views.forEach(v => (v.hidden = v.id !== id));
-    tabs.forEach(t => t.classList.toggle("active", t.dataset.view === id));
-  }
-
-  tabs.forEach(t => t.addEventListener("click", () => showView(t.dataset.view)));
-
-  document.querySelectorAll("[data-view]").forEach(btn => {
-    // Buttons wie "Jetzt reflektieren" / "Abbrechen"
-    btn.addEventListener("click", () => showView(btn.dataset.view));
-  });
-
-  showView("dashboard");
-}
-
-// ---------- Dashboard ----------
-function renderKpis() {
-  const allowanceInput = document.getElementById("allowance");
-  const goalInput = document.getElementById("goal");
-
-  const kpiAllowance = document.getElementById("kpiAllowance");
-  const kpiSpent = document.getElementById("kpiSpent");
-  const kpiLeft = document.getElementById("kpiLeft");
-  const kpiGoal = document.getElementById("kpiGoal");
-
-  const goalBar = document.getElementById("goalBar");
-  const goalHint = document.getElementById("goalHint");
-
-  if (allowanceInput) allowanceInput.value = state.allowance || "";
-  if (goalInput) goalInput.value = state.goal || "";
-
-  const weekly = getPurchasesLast7Days(state.purchases);
-  const spent = weekly.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
-  const left = Math.max((Number(state.allowance) || 0) - spent, 0);
-
-  if (kpiAllowance) kpiAllowance.textContent = formatEuro(state.allowance);
-  if (kpiSpent) kpiSpent.textContent = formatEuro(spent);
-  if (kpiLeft) kpiLeft.textContent = formatEuro(left);
-  if (kpiGoal) kpiGoal.textContent = formatEuro(state.goal);
-
-  let percent = 0;
-  if ((Number(state.goal) || 0) > 0) percent = Math.min(100, Math.round((left / state.goal) * 100));
-  if (goalBar) goalBar.style.width = percent + "%";
-  if (goalHint) goalHint.textContent = `${percent}% des Sparziels erreicht`;
-}
-
-function setupMoneyInputs() {
-  const allowanceInput = document.getElementById("allowance");
-  const goalInput = document.getElementById("goal");
-
-  if (allowanceInput) {
-    allowanceInput.addEventListener("input", () => {
-      state.allowance = Number(String(allowanceInput.value).replace(",", ".")) || 0;
-      saveState();
-      renderKpis();
-    });
-  }
-
-  if (goalInput) {
-    goalInput.addEventListener("input", () => {
-      state.goal = Number(String(goalInput.value).replace(",", ".")) || 0;
-      saveState();
-      renderKpis();
-      renderReflectGoal();
-    });
-  }
-}
-
-// ---------- Purchases ----------
-function renderPurchases() {
-  const tbody = document.querySelector("#purchaseTable tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  (state.purchases || []).forEach(p => {
-    const tr = document.createElement("tr");
-
-    const tdDate = document.createElement("td");
-    tdDate.textContent = p.date;
-
-    const tdName = document.createElement("td");
-    tdName.textContent = p.name;
-
-    const tdCat = document.createElement("td");
-    tdCat.textContent = p.category;
-
-    const tdPrice = document.createElement("td");
-    tdPrice.textContent = formatEuro(p.price);
-
-    const tdFeel = document.createElement("td");
-    tdFeel.textContent = feelToEmoji(p.feel);
-
-    const tdDel = document.createElement("td");
-    const del = document.createElement("button");
-    del.className = "btn small ghost";
-    del.textContent = "Löschen";
-    del.addEventListener("click", () => {
-      state.purchases = state.purchases.filter(x => x.id !== p.id);
-      saveState();
-      renderPurchases();
-      renderKpis();
-      renderReflect();
-      renderStats();
-      renderParent();
-    });
-    tdDel.appendChild(del);
-
-    tr.append(tdDate, tdName, tdCat, tdPrice, tdFeel, tdDel);
-    tbody.appendChild(tr);
-  });
-}
-
-function setupNewPurchase() {
-  const addQuick = document.getElementById("addQuick");
-  if (addQuick) addQuick.addEventListener("click", () => document.querySelector('.tab[data-view="new"]').click());
-
-  const emojiContainer = document.getElementById("initialEmojis");
-  if (emojiContainer) {
-    emojiContainer.addEventListener("click", (e) => {
-      const btn = e.target.closest(".emoji");
-      if (!btn) return;
-      currentFeel = Number(btn.dataset.val) || null;
-      emojiContainer.querySelectorAll(".emoji").forEach(b => b.classList.toggle("active", b === btn));
-    });
-  }
-
-  const saveBtn = document.getElementById("savePurchase");
-  const pName = document.getElementById("pName");
-  const pPrice = document.getElementById("pPrice");
-  const pCat = document.getElementById("pCat");
-
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      if (!pName || !pName.value.trim()) return alert("Bitte gib an, was du gekauft hast.");
-      const price = Number(String(pPrice?.value || "0").replace(",", ".")) || 0;
-
-      const purchase = {
-        id: Date.now(),
-        date: new Date().toISOString().slice(0, 10),
-        name: pName.value.trim(),
-        category: pCat?.value || "Sonstiges",
-        price,
-        feel: currentFeel,
-        note: "",
-        parentComment: ""
-      };
-
-      state.purchases = state.purchases || [];
-      state.purchases.unshift(purchase);
-      saveState();
-
-      // reset
-      if (pName) pName.value = "";
-      if (pPrice) pPrice.value = "";
-      currentFeel = null;
-      emojiContainer?.querySelectorAll(".emoji").forEach(b => b.classList.remove("active"));
-
-      renderPurchases();
-      renderKpis();
-      renderReflect();
-      renderStats();
-      renderParent();
-
-      document.querySelector('.tab[data-view="dashboard"]').click();
-    });
-  }
-}
-
-// ---------- Reflection ----------
-function renderReflect() {
-  const container = document.getElementById("reflectList");
-  if (!container) return;
-  container.innerHTML = "";
-
-  if (!state.purchases?.length) {
-    container.innerHTML = `<p class="muted">Noch keine Käufe zum Reflektieren.</p>`;
-    return;
-  }
-
-  state.purchases.forEach(p => {
-    const box = document.createElement("div");
-    box.className = "parent-child-card";
-    box.style.marginBottom = "10px";
-
-    const title = document.createElement("div");
-    title.innerHTML = `<strong>${p.name}</strong> · ${formatEuro(p.price)} · ${p.date} · ${p.category} · ${feelToEmoji(p.feel)}`;
-
-    const label = document.createElement("label");
-    label.textContent = "Deine Notiz:";
-    label.style.marginTop = "8px";
-
-    const ta = document.createElement("textarea");
-    ta.value = p.note || "";
-    ta.rows = 2;
-
-    ta.addEventListener("input", () => {
-      p.note = ta.value;
-      saveState();
-    });
-
-    box.appendChild(title);
-    box.appendChild(label);
-    box.appendChild(ta);
-    container.appendChild(box);
-  });
-}
-
-function setupReflectionSave() {
-  const btn = document.getElementById("saveReflection");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    saveState();
-    alert("Reflexion gespeichert.");
-  });
-}
-
-function renderReflectGoal() {
-  const bar = document.getElementById("reflectGoalBar");
-  const hint = document.getElementById("reflectGoalHint");
-
-  const weekly = getPurchasesLast7Days(state.purchases);
-  const spent = weekly.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
-  const left = Math.max((Number(state.allowance) || 0) - spent, 0);
-
-  let percent = 0;
-  if ((Number(state.goal) || 0) > 0) percent = Math.min(100, Math.round((left / state.goal) * 100));
-
-  if (bar) bar.style.width = percent + "%";
-  if (hint) hint.textContent = `${percent}% erreicht`;
-}
-
-// ---------- Stats ----------
-function renderStats() {
-  const catStats = document.getElementById("catStats");
-  const valuePrice = document.getElementById("valuePrice");
-  if (catStats) catStats.innerHTML = "";
-  if (valuePrice) valuePrice.innerHTML = "";
-
-  const purchases = state.purchases || [];
-  if (!purchases.length) {
-    if (catStats) catStats.innerHTML = `<p class="muted">Noch keine Daten.</p>`;
-    if (valuePrice) valuePrice.innerHTML = `<p class="muted">Noch keine Daten.</p>`;
-    return;
-  }
-
-  // Kategorie Summen
-  const sums = {};
-  purchases.forEach(p => {
-    const k = p.category || "Sonstiges";
-    sums[k] = (sums[k] || 0) + (Number(p.price) || 0);
-  });
-
-  if (catStats) {
-    Object.entries(sums)
-      .sort((a,b) => b[1]-a[1])
-      .forEach(([k,v]) => {
-        const row = document.createElement("div");
-        row.className = "muted";
-        row.style.marginBottom = "6px";
-        row.textContent = `${k}: ${formatEuro(v)}`;
-        catStats.appendChild(row);
-      });
-  }
-
-  // Wert (Emoji) vs Preis
-  if (valuePrice) {
-    purchases.slice(0, 10).forEach(p => {
-      const row = document.createElement("div");
-      row.className = "muted";
-      row.style.marginBottom = "6px";
-      row.textContent = `${feelToEmoji(p.feel)}  ${p.name} – ${formatEuro(p.price)}`;
-      valuePrice.appendChild(row);
-    });
-  }
-}
-
-// ---------- Parent view (Demo: gleiche Daten, Kommentare im selben State) ----------
-function renderParent() {
-  const parentList = document.getElementById("parentList");
-  const parentMessages = document.getElementById("parentMessages");
-  if (parentList) parentList.innerHTML = "";
-  if (parentMessages) parentMessages.innerHTML = "";
-
-  // Nachrichten
-  (state.parentMessages || []).forEach((m) => {
-    const box = document.createElement("div");
-    box.className = "parent-child-card";
-    box.textContent = m;
-    parentMessages?.appendChild(box);
-  });
-
-  // Käufe + Elternkommentar
-  if (!parentList) return;
-  if (!state.purchases?.length) {
-    parentList.innerHTML = `<p class="muted">Noch keine Käufe.</p>`;
-    return;
-  }
-
-  state.purchases.forEach(p => {
-    const box = document.createElement("div");
-    box.className = "parent-child-card";
-
-    const title = document.createElement("div");
-    title.innerHTML = `<strong>${p.name}</strong> · ${formatEuro(p.price)} · ${p.date} · ${p.category} · Gefühl: ${feelToEmoji(p.feel)}`;
-
-    const label = document.createElement("label");
-    label.textContent = "Eltern-Kommentar:";
-    label.style.marginTop = "8px";
-
-    const ta = document.createElement("textarea");
-    ta.rows = 2;
-    ta.value = p.parentComment || "";
-    ta.addEventListener("input", () => {
-      p.parentComment = ta.value;
-      saveState();
-    });
-
-    box.appendChild(title);
-    box.appendChild(label);
-    box.appendChild(ta);
-    parentList.appendChild(box);
-  });
-}
-
-function setupParentMessage() {
-  const ta = document.getElementById("parentMessage");
-  const btn = document.getElementById("parentMessageSave");
-  if (!ta || !btn) return;
-
-  btn.addEventListener("click", () => {
-    const msg = ta.value.trim();
-    if (!msg) return;
-    state.parentMessages = state.parentMessages || [];
-    state.parentMessages.unshift(msg);
-    ta.value = "";
-    saveState();
-    renderParent();
-  });
-}
-
-// ---------- Logout ----------
-function setupLogout() {
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (!logoutBtn) return;
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("loggedInEmail");
-    localStorage.removeItem("loggedInRole");
-    localStorage.removeItem("familyKey");
-    window.location.href = "index.html";
-  });
-}
-
-// ---------- Role handling (Demo) ----------
-function applyRole() {
-  // Wenn Kind: Elternsicht Tab ausblenden
-  const parentTab = document.querySelector('.tab[data-view="parent"]');
-  if (parentTab) parentTab.style.display = role === "parent" ? "inline-flex" : "none";
-
-  // Optional: wenn Eltern, neue Käufe ausblenden
-  // (Wenn du willst, kann ich das aktivieren)
-}
-
-// ---------- Init ----------
-document.addEventListener("DOMContentLoaded", () => {
-  if (!email) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  loadState();
-  applyRole();
-
-  setupTabs();
-  setupLogout();
-  setupMoneyInputs();
-  setupNewPurchase();
-  setupReflectionSave();
-  setupParentMessage();
-
-  renderKpis();
-  renderPurchases();
-  renderReflect();
-  renderReflectGoal();
-  renderStats();
-  renderParent();
-});
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wertvoll? – Deine Taschengeld-Entscheidung</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="row" style="justify-content:space-between">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>Wertvoll?</h1>
+            <div class="subtitle">Deine Taschengeld-Entscheidung</div>
+          </div>
+        </div>
+        <div class="row">
+          <button class="tab active" data-view="dashboard">Start</button>
+          <button class="tab" data-view="new">Neuer Kauf</button>
+          <button class="tab" data-view="reflect">Reflexion</button>
+          <button class="tab" data-view="stats">Statistik</button>
+          <button class="tab" data-view="parent">Elternsicht</button>
+          <button class="btn ghost" id="logoutBtn">Abmelden</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="dashboard" class="view">
+      <div class="grid">
+        <div class="card half">
+          <div class="row" style="justify-content:space-between; align-items:flex-start">
+            <div>
+              <h2 class="headline">Deine Woche</h2>
+              <div class="muted">Behalte dein Taschengeld im Blick</div>
+            </div>
+            <button class="btn secondary" id="addQuick">+ Neuer Kauf</button>
+          </div>
+
+          <div class="kpi" style="margin-top:12px">
+            <div class="pill">
+              <div class="muted">Taschengeld</div>
+              <h3 id="kpiAllowance">€ 0,00</h3>
+            </div>
+            <div class="pill">
+              <div class="muted">Ausgegeben</div>
+              <h3 id="kpiSpent">€ 0,00</h3>
+            </div>
+            <div class="pill">
+              <div class="muted">Übrig</div>
+              <h3 id="kpiLeft">€ 0,00</h3>
+            </div>
+            <div class="pill">
+              <div class="muted">Sparziel</div>
+              <h3 id="kpiGoal">€ 0,00</h3>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <label for="allowance">Wöchentliches Taschengeld (€)</label>
+            <input type="number" id="allowance" min="0" step="0.5" placeholder="z. B. 5" />
+          </div>
+
+          <div style="margin-top:10px">
+            <label for="goal">Sparziel (€)</label>
+            <input type="number" id="goal" min="0" step="1" placeholder="z. B. 50" />
+          </div>
+
+          <div style="margin-top:12px" class="bar">
+            <span id="goalBar" style="width:0%"></span>
+          </div>
+          <div class="muted" id="goalHint" style="margin-top:6px">0% des Sparziels erreicht</div>
+        </div>
+
+        <div class="card half">
+          <h2 class="headline">Letzte Käufe</h2>
+          <div class="muted">Was hast du zuletzt gekauft?</div>
+          <div style="overflow:auto; margin-top:10px">
+            <table id="purchaseTable">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Was?</th>
+                  <th>Kategorie</th>
+                  <th>Preis</th>
+                  <th>Gefühl</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="justify-content:space-between; align-items:center">
+            <div>
+              <h2 class="headline">Wöchentliche Reflexion</h2>
+              <div class="muted">Überlege: War dein Kauf wirklich <strong>wertvoll</strong>?</div>
+            </div>
+            <button class="btn" data-view="reflect">Jetzt reflektieren</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="new" class="view" hidden>
+      <div class="grid">
+        <div class="card">
+          <h2 class="headline">+ Neuer Kauf</h2>
+          <div class="row">
+            <div style="flex:1; min-width:220px">
+              <label for="pName">Was hast du gekauft?</label>
+              <input id="pName" placeholder="z. B. Eis" />
+            </div>
+            <div style="width:180px">
+              <label for="pPrice">Preis (€)</label>
+              <input id="pPrice" type="number" min="0" step="0.1" placeholder="1.50" />
+            </div>
+            <div style="width:220px">
+              <label for="pCat">Kategorie</label>
+              <select id="pCat">
+                <option value="Süßes">🍬 Süßes</option>
+                <option value="Snacks">🧃 Snacks</option>
+                <option value="Spielzeug">🎮 Spielzeug</option>
+                <option value="Basteln">✂️ Basteln</option>
+                <option value="Bücher">📚 Bücher</option>
+                <option value="Sonstiges">🎁 Sonstiges</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Wie hast du dich beim Kauf gefühlt?</label>
+            <div class="emojis" id="initialEmojis">
+              <button class="emoji" data-val="5">😍</button>
+              <button class="emoji" data-val="4">🤩</button>
+              <button class="emoji" data-val="3">😊</button>
+              <button class="emoji" data-val="2">😐</button>
+              <button class="emoji" data-val="1">☹️</button>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:16px">
+            <button class="btn secondary" id="savePurchase">Kauf speichern</button>
+            <button class="btn ghost" data-view="dashboard">Abbrechen</button>
+          </div>
+
+          <div class="footer">Hinweis: Alle Daten bleiben auf diesem Gerät (LocalStorage).</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reflect" class="view" hidden>
+      <div class="grid">
+        <div class="card half">
+          <h2 class="headline">Reflexion dieser Woche</h2>
+          <p class="muted">Bewerte deine Käufe: Waren sie <strong>wirklich</strong> wertvoll?</p>
+          <div id="reflectList"></div>
+          <div class="row" style="margin-top:14px">
+            <button class="btn" id="saveReflection">Reflexion speichern</button>
+            <span class="muted">(Du kannst Notizen zu jedem Kauf schreiben)</span>
+          </div>
+        </div>
+        <div class="card half">
+          <h3 class="headline-sm">Tipp der Woche</h3>
+          <div class="note">
+            Überlege vor einem Kauf: <strong>Benutze ich es noch in zwei Wochen?</strong>
+            Wenn nein: lieber sparen! 🐷
+          </div>
+          <h3 class="headline-sm">Sparziel-Fortschritt</h3>
+          <div class="bar"><span id="reflectGoalBar" style="width:0%"></span></div>
+          <div class="muted" id="reflectGoalHint" style="margin-top:6px">0% erreicht</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stats" class="view" hidden>
+      <div class="grid">
+        <div class="card half">
+          <h2 class="headline">Wofür gibst du Geld aus?</h2>
+          <div id="catStats"></div>
+        </div>
+        <div class="card half">
+          <h2 class="headline">Wert vs. Preis</h2>
+          <div id="valuePrice"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="parent" class="view" hidden>
+      <div class="grid">
+        <div class="card">
+          <h2 class="headline">Elternsicht</h2>
+          <p class="muted">Nur Lesen + Kommentare. Ziel: <em>Begleitung statt Kontrolle.</em></p>
+
+          <div class="parent-add">
+            <label for="parentMessage">Allgemeine Nachricht an dein Kind</label>
+            <textarea id="parentMessage" rows="2" placeholder='z. B. "Wir sind stolz auf dich!"'></textarea>
+            <button class="btn secondary" id="parentMessageSave">Nachricht hinzufügen</button>
+          </div>
+
+          <div id="parentMessages"></div>
+
+          <hr style="margin:18px 0; border:none; border-top:1px solid #e5e7eb">
+
+          <div id="parentList"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const email = localStorage.getItem("loggedInEmail");
+    if (!email) window.location.href = "index.html";
+  </script>
+
+  <script src="/WebsiteSparen.js" defer></script>
+</body>
+</html>
