@@ -14,11 +14,7 @@
 
 *{box-sizing:border-box}
 
-html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-}
+html,body{margin:0;padding:0;height:100%}
 
 body{
   font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -26,8 +22,7 @@ body{
   color:var(--text);
 }
 
-/* Header / Brand */
-
+/* Header */
 header{
   position:sticky;
   top:0;
@@ -35,6 +30,7 @@ header{
   backdrop-filter:blur(10px);
   background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.7));
   border-bottom:1px solid #e5e7eb;
+  pointer-events:auto; /* CLICK-FIX */
 }
 
 .container{
@@ -76,12 +72,10 @@ h1{
   font-size:28px;
   font-family:"Baloo 2","Poppins",system-ui;
 }
-.subtitle{
-  margin-top:-2px;
-  color:var(--muted);
-}
+.subtitle{margin-top:-2px;color:var(--muted);}
 
 /* Tabs */
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 .tab{
   appearance:none;
@@ -100,10 +94,8 @@ h1{
   border-color:var(--mint);
   color:#064e3b;
 }
-.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* Buttons */
-
 .btn{
   display:inline-flex;
   align-items:center;
@@ -128,15 +120,9 @@ h1{
   border:1px solid #e5e7eb;
   box-shadow:none;
 }
-.btn.small{
-  padding:6px 10px;
-  font-size:.8rem;
-  border-radius:999px;
-}
-.btn.danger{background:var(--danger);}
+.btn.small{padding:6px 10px;font-size:.8rem;border-radius:999px;}
 
 /* Inputs */
-
 label{font-weight:600;font-size:.9rem;display:block;margin-bottom:4px;}
 input,select,textarea{
   width:100%;
@@ -154,12 +140,9 @@ input:focus,select:focus,textarea:focus{
 textarea{resize:vertical;min-height:60px;}
 .muted{color:var(--muted);font-size:.88rem;}
 .error{color:var(--danger);font-size:.85rem;margin-top:6px;}
-.success{color:var(--ok);font-size:.85rem;margin-top:6px;}
 
-/* Layout Cards */
-
+/* Layout */
 main{padding:24px 0;}
-
 .grid{
   display:grid;
   grid-template-columns:repeat(12,1fr);
@@ -172,14 +155,12 @@ main{padding:24px 0;}
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
-
 @media(min-width:900px){
   .card.half{grid-column:span 6;}
   .auth-grid{grid-template-columns:1.15fr .85fr;}
 }
 
 /* Auth Layout */
-
 .auth-layout{
   min-height:calc(100vh - 90px);
   display:flex;
@@ -191,45 +172,8 @@ main{padding:24px 0;}
   gap:20px;
   width:100%;
 }
-.hero-text h2{
-  margin:0 0 8px;
-  font-family:"Baloo 2","Poppins";
-  font-size:26px;
-}
-.hero-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:6px 10px;
-  border-radius:999px;
-  background:#e0fbf3;
-  color:#065f46;
-  font-size:.8rem;
-  font-weight:600;
-}
 
-/* Role picker */
-
-.role-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
-.role-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid #e5e7eb;
-  background:#fff;
-  cursor:pointer;
-  font-size:.9rem;
-}
-.role-pill input{margin:0;}
-.role-pill.active{
-  background:#ecfdf5;
-  border-color:var(--mint);
-}
-
-/* KPI & Table */
-
+/* KPI */
 .headline{font-family:"Baloo 2","Poppins";margin:0 0 6px;}
 .headline-sm{font-family:"Baloo 2","Poppins";margin:0 0 4px;}
 .footer{margin-top:18px;color:var(--muted);font-size:.8rem;}
@@ -260,11 +204,8 @@ main{padding:24px 0;}
   background:var(--mint);
 }
 
-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0 8px;
-}
+/* Table */
+table{width:100%;border-collapse:separate;border-spacing:0 8px;}
 th{
   text-align:left;
   font-size:.8rem;
@@ -281,7 +222,6 @@ td:first-child{border-radius:10px 0 0 10px;}
 td:last-child{border-radius:0 10px 10px 0;}
 
 /* Emoji */
-
 .emojis{display:flex;gap:10px;font-size:26px;margin-top:6px;}
 .emoji{
   border:none;
@@ -291,30 +231,26 @@ td:last-child{border-radius:0 10px 10px 0;}
   opacity:.6;
   transition:.14s;
 }
-.emoji.active{
-  filter:none;
-  opacity:1;
-  transform:scale(1.1);
-}
+.emoji.active{filter:none;opacity:1;transform:scale(1.1);}
 
-/* Parent / Family */
-
-.family-key-box{
-  padding:10px 12px;
-  border-radius:14px;
-  background:#ecfdf5;
-  border:1px dashed #4ade80;
-  font-size:.9rem;
-}
-.family-key{
-  font-weight:800;
-  letter-spacing:.18em;
-}
-
+/* Parent blocks */
 .parent-child-card{
   border-radius:14px;
   border:1px solid #e5e7eb;
   padding:10px 12px;
   margin-bottom:10px;
+  background:#f9fafb;
+}
+.parent-add{
+  margin:10px 0 14px;
+  padding:12px;
+  border-radius:14px;
+  border:1px dashed #d1d5db;
+  background:#fff;
+}
+.note{
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
   background:#f9fafb;
 }

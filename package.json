@@ -1,14 +1,13 @@
 {
   "name": "sparen-demo",
   "version": "1.0.0",
+  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "mongodb": "^7.0.0",
-    "mongoose": "^9.0.1"
+    "express": "^4.22.1"
   },
   "engines": {
     "node": ">=18"

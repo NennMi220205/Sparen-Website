@@ -12,218 +12,253 @@
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-  <header>
-    <div class="container">
-      <div class="row" style="justify-content:space-between">
-        <div class="brand">
-          <div class="logo" aria-hidden="true"></div>
-          <div>
-            <h1>Wertvoll?</h1>
-            <div class="subtitle">Deine Taschengeld-Entscheidung</div>
-          </div>
+<header>
+  <div class="container">
+    <div class="row" style="justify-content:space-between">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Wertvoll?</h1>
+          <div class="subtitle">Deine Taschengeld-Entscheidung</div>
         </div>
-        <div class="row">
-          <button class="tab active" data-view="dashboard">Start</button>
-          <button class="tab" data-view="new">Neuer Kauf</button>
-          <button class="tab" data-view="reflect">Reflexion</button>
-          <button class="tab" data-view="stats">Statistik</button>
-          <button class="tab" data-view="parent">Elternsicht</button>
-          <button class="btn ghost" id="logoutBtn">Abmelden</button>
-        </div>
+      </div>
+
+      <div class="row">
+        <button class="tab active" data-view="dashboard" type="button">Start</button>
+        <button class="tab" data-view="new" type="button">Neuer Kauf</button>
+        <button class="tab" data-view="reflect" type="button">Reflexion</button>
+        <button class="tab" data-view="stats" type="button">Statistik</button>
+        <button class="tab" data-view="parent" type="button">Elternsicht</button>
+        <button class="btn ghost" id="logoutBtn" type="button">Abmelden</button>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="container">
-    <section id="dashboard" class="view">
-      <div class="grid">
-        <div class="card half">
-          <div class="row" style="justify-content:space-between; align-items:flex-start">
-            <div>
-              <h2 class="headline">Deine Woche</h2>
-              <div class="muted">Behalte dein Taschengeld im Blick</div>
-            </div>
-            <button class="btn secondary" id="addQuick">+ Neuer Kauf</button>
+<main class="container">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="view">
+    <div class="grid">
+
+      <div class="card half">
+        <div class="row" style="justify-content:space-between; align-items:flex-start">
+          <div>
+            <h2 class="headline">Deine Woche</h2>
+            <div class="muted" id="whoAmI">…</div>
           </div>
+          <button class="btn secondary" id="addQuick" type="button">+ Neuer Kauf</button>
+        </div>
 
-          <div class="kpi" style="margin-top:12px">
-            <div class="pill">
-              <div class="muted">Taschengeld</div>
-              <h3 id="kpiAllowance">€ 0,00</h3>
-            </div>
-            <div class="pill">
-              <div class="muted">Ausgegeben</div>
-              <h3 id="kpiSpent">€ 0,00</h3>
-            </div>
-            <div class="pill">
-              <div class="muted">Übrig</div>
-              <h3 id="kpiLeft">€ 0,00</h3>
-            </div>
-            <div class="pill">
-              <div class="muted">Sparziel</div>
-              <h3 id="kpiGoal">€ 0,00</h3>
-            </div>
+        <div class="kpi" style="margin-top:12px">
+          <div class="pill">
+            <div class="muted">Taschengeld (Woche)</div>
+            <h3 id="kpiAllowance">€ 0,00</h3>
           </div>
-
-          <div style="margin-top:16px">
-            <label for="allowance">Wöchentliches Taschengeld (€)</label>
-            <input type="number" id="allowance" min="0" step="0.5" placeholder="z. B. 5" />
+          <div class="pill">
+            <div class="muted">Ausgegeben (7 Tage)</div>
+            <h3 id="kpiSpent">€ 0,00</h3>
           </div>
+          <div class="pill">
+            <div class="muted">Übrig (7 Tage)</div>
+            <h3 id="kpiLeft">€ 0,00</h3>
+          </div>
+          <div class="pill">
+            <div class="muted">Sparziel</div>
+            <h3 id="kpiGoal">—</h3>
+          </div>
+        </div>
 
+        <!-- Taschengeld-Block: Kind sieht nur Info, Eltern stellen im Eltern-Tab ein -->
+        <div style="margin-top:16px" class="note">
+          <strong>Taschengeld:</strong>
+          <div class="muted">
+            Dein Taschengeld wird von deinen Eltern eingestellt.
+          </div>
+        </div>
+
+        <!-- Sparziel: vom Kind -->
+        <div style="margin-top:12px">
+          <h3 class="headline-sm">Dein Sparziel (physisch)</h3>
+          <label for="goalItem">Wofür sparst du?</label>
+          <input id="goalItem" placeholder="z. B. Lego-Set / Fußball / Fahrrad" />
           <div style="margin-top:10px">
-            <label for="goal">Sparziel (€)</label>
-            <input type="number" id="goal" min="0" step="1" placeholder="z. B. 50" />
-          </div>
-
-          <div style="margin-top:12px" class="bar">
-            <span id="goalBar" style="width:0%"></span>
-          </div>
-          <div class="muted" id="goalHint" style="margin-top:6px">0% des Sparziels erreicht</div>
-        </div>
-
-        <div class="card half">
-          <h2 class="headline">Letzte Käufe</h2>
-          <div class="muted">Was hast du zuletzt gekauft?</div>
-          <div style="overflow:auto; margin-top:10px">
-            <table id="purchaseTable">
-              <thead>
-                <tr>
-                  <th>Datum</th>
-                  <th>Was?</th>
-                  <th>Kategorie</th>
-                  <th>Preis</th>
-                  <th>Gefühl</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+            <label for="goalPrice">Optional: ungefährer Preis (€) für Fortschritt</label>
+            <input id="goalPrice" type="number" min="0" step="1" placeholder="z. B. 50" />
+            <div class="muted" style="margin-top:6px">
+              Ziel wird als Gegenstand gespeichert. Der Preis ist nur, damit wir den Fortschritt anzeigen können.
+            </div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="row" style="justify-content:space-between; align-items:center">
+        <div style="margin-top:12px" class="bar">
+          <span id="goalBar" style="width:0%"></span>
+        </div>
+        <div class="muted" id="goalHint" style="margin-top:6px">0% erreicht</div>
+      </div>
+
+      <div class="card half">
+        <h2 class="headline">Letzte Käufe</h2>
+        <div class="muted">Was hast du zuletzt gekauft?</div>
+        <div style="overflow:auto; margin-top:10px">
+          <table id="purchaseTable">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Was?</th>
+                <th>Kategorie</th>
+                <th>Preis</th>
+                <th>Gefühl</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div>
+            <h2 class="headline">Wöchentliche Reflexion</h2>
+            <div class="muted">Überlege: War dein Kauf wirklich <strong>wertvoll</strong>?</div>
+          </div>
+          <button class="btn" data-view="reflect" type="button">Jetzt reflektieren</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- NEUER KAUF -->
+  <section id="new" class="view" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 class="headline">+ Neuer Kauf</h2>
+
+        <div class="row">
+          <div style="flex:1; min-width:220px">
+            <label for="pName">Was hast du gekauft?</label>
+            <input id="pName" placeholder="z. B. Eis" />
+          </div>
+          <div style="width:180px">
+            <label for="pPrice">Preis (€)</label>
+            <input id="pPrice" type="number" min="0" step="0.1" placeholder="1.50" />
+          </div>
+          <div style="width:220px">
+            <label for="pCat">Kategorie</label>
+            <select id="pCat">
+              <option value="Süßes">🍬 Süßes</option>
+              <option value="Snacks">🧃 Snacks</option>
+              <option value="Spielzeug">🎮 Spielzeug</option>
+              <option value="Basteln">✂️ Basteln</option>
+              <option value="Bücher">📚 Bücher</option>
+              <option value="Sonstiges">🎁 Sonstiges</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Wie hast du dich beim Kauf gefühlt?</label>
+          <div class="emojis" id="initialEmojis">
+            <button class="emoji" data-val="5" type="button">😍</button>
+            <button class="emoji" data-val="4" type="button">🤩</button>
+            <button class="emoji" data-val="3" type="button">😊</button>
+            <button class="emoji" data-val="2" type="button">😐</button>
+            <button class="emoji" data-val="1" type="button">☹️</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:16px">
+          <button class="btn secondary" id="savePurchase" type="button">Kauf speichern</button>
+          <button class="btn ghost" data-view="dashboard" type="button">Abbrechen</button>
+        </div>
+
+        <div class="footer">Hinweis: Familien-Daten werden im Browser gespeichert (LocalStorage).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REFLEXION -->
+  <section id="reflect" class="view" hidden>
+    <div class="grid">
+      <div class="card half">
+        <h2 class="headline">Reflexion</h2>
+        <p class="muted">Schreib Notizen zu deinen Käufen.</p>
+        <div id="reflectList"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" id="saveReflection" type="button">Reflexion speichern</button>
+          <span class="muted">(Notizen speichern automatisch)</span>
+        </div>
+      </div>
+      <div class="card half">
+        <h3 class="headline-sm">Tipp der Woche</h3>
+        <div class="note">
+          Frage dich: <strong>Werde ich das in 2 Wochen noch benutzen?</strong> 🐷
+        </div>
+        <h3 class="headline-sm" style="margin-top:12px">Sparziel-Fortschritt</h3>
+        <div class="bar"><span id="reflectGoalBar" style="width:0%"></span></div>
+        <div class="muted" id="reflectGoalHint" style="margin-top:6px">0% erreicht</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATISTIK -->
+  <section id="stats" class="view" hidden>
+    <div class="grid">
+      <div class="card half">
+        <h2 class="headline">Wofür gibst du Geld aus?</h2>
+        <div id="catStats"></div>
+      </div>
+      <div class="card half">
+        <h2 class="headline">Wert vs. Preis</h2>
+        <div id="valuePrice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ELTERNSICHT -->
+  <section id="parent" class="view" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 class="headline">Elternsicht</h2>
+        <p class="muted">Hier können Eltern Taschengeld einstellen und Käufe sehen (nur Eltern sichtbar).</p>
+
+        <div class="note" id="parentLock">
+          Du bist kein Elternteil – diese Ansicht ist gesperrt.
+        </div>
+
+        <div id="parentUi" hidden>
+          <div class="row" style="gap:14px; align-items:flex-end">
+            <div style="min-width:260px; flex:1">
+              <label for="childSelect">Kind auswählen</label>
+              <select id="childSelect"></select>
+            </div>
+            <div style="width:260px">
+              <label for="parentAllowance">Taschengeld pro Woche (€)</label>
+              <input id="parentAllowance" type="number" min="0" step="0.5" placeholder="z. B. 10" />
+            </div>
             <div>
-              <h2 class="headline">Wöchentliche Reflexion</h2>
-              <div class="muted">Überlege: War dein Kauf wirklich <strong>wertvoll</strong>?</div>
-            </div>
-            <button class="btn" data-view="reflect">Jetzt reflektieren</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="new" class="view" hidden>
-      <div class="grid">
-        <div class="card">
-          <h2 class="headline">+ Neuer Kauf</h2>
-          <div class="row">
-            <div style="flex:1; min-width:220px">
-              <label for="pName">Was hast du gekauft?</label>
-              <input id="pName" placeholder="z. B. Eis" />
-            </div>
-            <div style="width:180px">
-              <label for="pPrice">Preis (€)</label>
-              <input id="pPrice" type="number" min="0" step="0.1" placeholder="1.50" />
-            </div>
-            <div style="width:220px">
-              <label for="pCat">Kategorie</label>
-              <select id="pCat">
-                <option value="Süßes">🍬 Süßes</option>
-                <option value="Snacks">🧃 Snacks</option>
-                <option value="Spielzeug">🎮 Spielzeug</option>
-                <option value="Basteln">✂️ Basteln</option>
-                <option value="Bücher">📚 Bücher</option>
-                <option value="Sonstiges">🎁 Sonstiges</option>
-              </select>
+              <button class="btn secondary" id="saveAllowance" type="button">Taschengeld speichern</button>
             </div>
           </div>
-
-          <div style="margin-top:12px">
-            <label>Wie hast du dich beim Kauf gefühlt?</label>
-            <div class="emojis" id="initialEmojis">
-              <button class="emoji" data-val="5">😍</button>
-              <button class="emoji" data-val="4">🤩</button>
-              <button class="emoji" data-val="3">😊</button>
-              <button class="emoji" data-val="2">😐</button>
-              <button class="emoji" data-val="1">☹️</button>
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:16px">
-            <button class="btn secondary" id="savePurchase">Kauf speichern</button>
-            <button class="btn ghost" data-view="dashboard">Abbrechen</button>
-          </div>
-
-          <div class="footer">Hinweis: Alle Daten bleiben auf diesem Gerät (LocalStorage).</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="reflect" class="view" hidden>
-      <div class="grid">
-        <div class="card half">
-          <h2 class="headline">Reflexion dieser Woche</h2>
-          <p class="muted">Bewerte deine Käufe: Waren sie <strong>wirklich</strong> wertvoll?</p>
-          <div id="reflectList"></div>
-          <div class="row" style="margin-top:14px">
-            <button class="btn" id="saveReflection">Reflexion speichern</button>
-            <span class="muted">(Du kannst Notizen zu jedem Kauf schreiben)</span>
-          </div>
-        </div>
-        <div class="card half">
-          <h3 class="headline-sm">Tipp der Woche</h3>
-          <div class="note">
-            Überlege vor einem Kauf: <strong>Benutze ich es noch in zwei Wochen?</strong>
-            Wenn nein: lieber sparen! 🐷
-          </div>
-          <h3 class="headline-sm">Sparziel-Fortschritt</h3>
-          <div class="bar"><span id="reflectGoalBar" style="width:0%"></span></div>
-          <div class="muted" id="reflectGoalHint" style="margin-top:6px">0% erreicht</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="stats" class="view" hidden>
-      <div class="grid">
-        <div class="card half">
-          <h2 class="headline">Wofür gibst du Geld aus?</h2>
-          <div id="catStats"></div>
-        </div>
-        <div class="card half">
-          <h2 class="headline">Wert vs. Preis</h2>
-          <div id="valuePrice"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="parent" class="view" hidden>
-      <div class="grid">
-        <div class="card">
-          <h2 class="headline">Elternsicht</h2>
-          <p class="muted">Nur Lesen + Kommentare. Ziel: <em>Begleitung statt Kontrolle.</em></p>
-
-          <div class="parent-add">
-            <label for="parentMessage">Allgemeine Nachricht an dein Kind</label>
-            <textarea id="parentMessage" rows="2" placeholder='z. B. "Wir sind stolz auf dich!"'></textarea>
-            <button class="btn secondary" id="parentMessageSave">Nachricht hinzufügen</button>
-          </div>
-
-          <div id="parentMessages"></div>
 
           <hr style="margin:18px 0; border:none; border-top:1px solid #e5e7eb">
 
-          <div id="parentList"></div>
+          <h3 class="headline-sm">Käufe des Kindes</h3>
+          <div id="parentPurchases"></div>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <script>
-    const email = localStorage.getItem("loggedInEmail");
-    if (!email) window.location.href = "/WebsiteSparen.html";
-  </script>
+</main>
 
-  <script src="/WebsiteSparen.js" defer></script>
+<script>
+  if (!localStorage.getItem("loggedInEmail")) {
+    window.location.href = "/index.html";
+  }
+</script>
+<script src="/WebsiteSparen.js" defer></script>
 </body>
 </html>

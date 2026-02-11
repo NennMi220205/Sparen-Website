@@ -1,14 +1,16 @@
-// WebsiteSparen.js — passt zu WebsiteSparen.html
+// WebsiteSparen.js
 
 const email = localStorage.getItem("loggedInEmail");
 const role = localStorage.getItem("loggedInRole") || "child";
+if (!email) window.location.href = "/index.html";
+
 const KEY = (name) => `wertvoll:${email}:${name}`;
 
 let state = {
   allowance: 0,
   goal: 0,
-  purchases: [],       // {id,date,name,category,price,feel,note,parentComment}
-  parentMessages: []   // strings
+  purchases: [],
+  parentMessages: []
 };
 
 let currentFeel = null;
@@ -23,9 +25,11 @@ function feelToEmoji(feel) {
 }
 function loadState() {
   const raw = localStorage.getItem(KEY("state"));
-  if (raw) {
-    try { state = JSON.parse(raw); } catch {}
-  }
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") state = { ...state, ...parsed };
+  } catch {}
 }
 function saveState() {
   localStorage.setItem(KEY("state"), JSON.stringify(state));
@@ -86,6 +90,7 @@ function renderKpis() {
 
   let percent = 0;
   if ((Number(state.goal) || 0) > 0) percent = Math.min(100, Math.round((left / state.goal) * 100));
+
   if (goalBar) goalBar.style.width = percent + "%";
   if (goalHint) goalHint.textContent = `${percent}% des Sparziels erreicht`;
 }
@@ -171,6 +176,7 @@ function setupNewPurchase() {
     emojiContainer.addEventListener("click", (e) => {
       const btn = e.target.closest(".emoji");
       if (!btn) return;
+
       currentFeel = Number(btn.dataset.val) || null;
       emojiContainer.querySelectorAll(".emoji").forEach(b => b.classList.toggle("active", b === btn));
     });
@@ -181,41 +187,41 @@ function setupNewPurchase() {
   const pPrice = document.getElementById("pPrice");
   const pCat = document.getElementById("pCat");
 
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      if (!pName || !pName.value.trim()) return alert("Bitte gib an, was du gekauft hast.");
-      const price = Number(String(pPrice?.value || "0").replace(",", ".")) || 0;
+  if (!saveBtn) return;
 
-      const purchase = {
-        id: Date.now(),
-        date: new Date().toISOString().slice(0, 10),
-        name: pName.value.trim(),
-        category: pCat?.value || "Sonstiges",
-        price,
-        feel: currentFeel,
-        note: "",
-        parentComment: ""
-      };
+  saveBtn.addEventListener("click", () => {
+    if (!pName || !pName.value.trim()) return alert("Bitte gib an, was du gekauft hast.");
+    const price = Number(String(pPrice?.value || "0").replace(",", ".")) || 0;
 
-      state.purchases = state.purchases || [];
-      state.purchases.unshift(purchase);
-      saveState();
+    const purchase = {
+      id: Date.now(),
+      date: new Date().toISOString().slice(0, 10),
+      name: pName.value.trim(),
+      category: pCat?.value || "Sonstiges",
+      price,
+      feel: currentFeel,
+      note: "",
+      parentComment: ""
+    };
 
-      if (pName) pName.value = "";
-      if (pPrice) pPrice.value = "";
-      currentFeel = null;
-      emojiContainer?.querySelectorAll(".emoji").forEach(b => b.classList.remove("active"));
+    state.purchases = state.purchases || [];
+    state.purchases.unshift(purchase);
+    saveState();
 
-      renderPurchases();
-      renderKpis();
-      renderReflect();
-      renderReflectGoal();
-      renderStats();
-      renderParent();
+    pName.value = "";
+    if (pPrice) pPrice.value = "";
+    currentFeel = null;
+    emojiContainer?.querySelectorAll(".emoji").forEach(b => b.classList.remove("active"));
 
-      document.querySelector('.tab[data-view="dashboard"]')?.click();
-    });
-  }
+    renderPurchases();
+    renderKpis();
+    renderReflect();
+    renderReflectGoal();
+    renderStats();
+    renderParent();
+
+    document.querySelector('.tab[data-view="dashboard"]')?.click();
+  });
 }
 
 // ---------- reflection ----------
@@ -225,7 +231,7 @@ function renderReflect() {
   container.innerHTML = "";
 
   if (!state.purchases?.length) {
-    container.innerHTML = `<p class="muted">Noch keine Käufe zum Reflektieren.</p>`;
+    container.innerHTML = `<div class="note">Noch keine Käufe. Geh zu <b>Neuer Kauf</b> und speichere etwas 😊</div>`;
     return;
   }
 
@@ -337,6 +343,7 @@ function renderParent() {
   });
 
   if (!parentList) return;
+
   if (!state.purchases?.length) {
     parentList.innerHTML = `<p class="muted">Noch keine Käufe.</p>`;
     return;
@@ -388,6 +395,7 @@ function setupParentMessage() {
 function setupLogout() {
   const logoutBtn = document.getElementById("logoutBtn");
   if (!logoutBtn) return;
+
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("loggedInEmail");
     localStorage.removeItem("loggedInRole");
@@ -403,11 +411,6 @@ function applyRole() {
 
 // ---------- init ----------
 document.addEventListener("DOMContentLoaded", () => {
-  if (!email) {
-    window.location.href = "/index.html";
-    return;
-  }
-
   loadState();
   applyRole();
 
